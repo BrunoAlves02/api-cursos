@@ -1,54 +1,64 @@
 package br.com.apicursos.service
 
+import br.com.apicursos.data.vo.v1.CursoVO
+import br.com.apicursos.exceptions.ResourceNotFoundException
+import br.com.apicursos.mapper.DozerMapper
 import br.com.apicursos.model.Curso
+import br.com.apicursos.repository.CursoRepository
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
-import java.util.concurrent.atomic.AtomicLong
 import java.util.logging.Logger
 
 @Service
 class CursoService() {
 
-    private val counter: AtomicLong = AtomicLong()
+    @Autowired
+    private lateinit var repository: CursoRepository
+
     private val logger = Logger.getLogger(CursoService::class.java.name)
 
-    fun findAll(): List<Curso>{
-        logger.info("Finding all Classes!")
-        val cursos: MutableList<Curso> = ArrayList()
-
-        for(i in 0..7){
-            val curso = mockCurso(i)
-            cursos.add(curso)
-        }
-
-        return cursos
+    fun findAll(): List<CursoVO>{
+        logger.info("Finding all Courses!")
+        val cursos = repository.findAll()
+        return DozerMapper.parseListObject(cursos, CursoVO::class.java)
     }
 
-    fun findById(id: Long): Curso{
+    fun findById(id: Long): CursoVO{
         logger.info("Finding one courses!")
 
-        val curso = Curso()
-        curso.id = counter.incrementAndGet()
-        curso.nome= "Curso de Android com SpringBoot"
-        curso.descricao = "Android com MVVM"
-        curso.categoria = "Mobile"
-        curso.cargaHoraria = "10hrs"
-        curso.dataAdicionada = "10/10/10"
-        return curso
+        var curso = repository.findById(id)
+            .orElseThrow { ResourceNotFoundException("No records found for this ID!") }
+        return DozerMapper.parseObject(curso, CursoVO::class.java)
     }
 
-    fun create (curso: Curso) = curso
-    fun update (curso: Curso) = curso
-    fun delete (id:Long){}
-
-    private fun mockCurso(i: Int): Curso {
-        val curso = Curso()
-        curso.id = counter.incrementAndGet()
-        curso.nome= "Curso de Android com SpringBoot"
-        curso.descricao = "Android com MVVM"
-        curso.categoria = "Mobile"
-        curso.cargaHoraria = "10hrs"
-        curso.dataAdicionada = "10/10/10"
-        return curso
+    fun create (curso: CursoVO): CursoVO{
+        logger.info("Course created with name ${curso.nome}!")
+        val entity: Curso = DozerMapper.parseObject(curso, Curso::class.java)
+        repository.save(entity)
+        return DozerMapper.parseObject(entity, CursoVO::class.java)
     }
+
+    fun update (curso: CursoVO): CursoVO {
+        logger.info("Course updated with ID ${curso.id}!")
+        val entity = repository.findById(curso.id)
+            .orElseThrow { ResourceNotFoundException("No records found for this ID!") }
+
+        entity.nome = curso.nome
+        entity.descricao = curso.descricao
+        entity.categoria = curso.categoria
+        entity.cargaHoraria = curso.cargaHoraria
+        entity.dataAdicionada = curso.dataAdicionada
+
+        repository.save(entity)
+        return DozerMapper.parseObject(entity, CursoVO::class.java)
+    }
+
+    fun delete (id: Long){
+        logger.info("Course deleted with ID ${id}!")
+        val entity = repository.findById(id)
+            .orElseThrow{ResourceNotFoundException("No records found for this ID!")}
+        repository.delete(entity)
+    }
+
 
 }

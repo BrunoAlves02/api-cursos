@@ -1,9 +1,10 @@
 package br.com.apicursos.controller
 
-import br.com.apicursos.model.Curso
+import br.com.apicursos.data.vo.v1.CursoVO
 import br.com.apicursos.service.CursoService
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.MediaType
+import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
 @RestController
@@ -13,36 +14,36 @@ class CursoController {
     @Autowired
     private lateinit var service: CursoService
 
-    @RequestMapping(method = [RequestMethod.GET],
-        produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun findAll(): List<Curso> {
+    @GetMapping( produces = [MediaType.APPLICATION_JSON_VALUE])
+    fun findAll(): List<CursoVO> {
         return service.findAll()
     }
 
-    @RequestMapping(value = ["/{id}"], method = [RequestMethod.GET],
+    @GetMapping(value = ["/{id}"],
         produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun findById(@PathVariable(value = "id") id : Long): Curso{
+    fun findById(@PathVariable(value = "id") id : Long): CursoVO{
         return service.findById(id)
     }
 
-    @RequestMapping(method = [RequestMethod.POST],
+    @PostMapping(
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun create(@RequestBody curso: Curso): Curso {
+    fun create(@RequestBody curso: CursoVO): CursoVO {
         return service.create(curso)
     }
 
-    @RequestMapping(method = [RequestMethod.PUT],
+    @PutMapping(
         consumes = [MediaType.APPLICATION_JSON_VALUE],
         produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun update(@RequestBody curso: Curso): Curso{
+    fun update(@RequestBody curso: CursoVO): CursoVO{
         return service.update(curso)
     }
 
-    @RequestMapping(value = ["/{id}"], method = [RequestMethod.DELETE],
+    @DeleteMapping(value = ["/{id}"],
         produces = [MediaType.APPLICATION_JSON_VALUE])
-    fun delete(@PathVariable(value = "id") id : Long){
-        return service.delete(id)
+    fun delete(@PathVariable(value = "id") id : Long): ResponseEntity<*>{
+        service.delete(id)
+        return ResponseEntity.noContent().build<Any>()
     }
 
 }

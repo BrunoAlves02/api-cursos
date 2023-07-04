@@ -1,5 +1,7 @@
-package br.com.apicursos.exceptions
+package br.com.apicursos.exceptions.handler
 
+import br.com.apicursos.exceptions.ExceptionResponse
+import br.com.apicursos.exceptions.ResourceNotFoundException
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.ControllerAdvice
@@ -17,22 +19,22 @@ class CustomizedResponseEntityExceptionHandler : ResponseEntityExceptionHandler(
     @ExceptionHandler(Exception::class)
     fun handleAllExceptions(ex: Exception, request: WebRequest) :
             ResponseEntity<ExceptionResponse> {
-        val exceptioResponse = ExceptionResponse(
+        val exceptionResponse = ExceptionResponse(
             Date(),
             ex.message,
             request.getDescription(false)
         )
-        return ResponseEntity<ExceptionResponse>(exceptioResponse, HttpStatus.INTERNAL_SERVER_ERROR)
+        return ResponseEntity<ExceptionResponse>(exceptionResponse, HttpStatus.INTERNAL_SERVER_ERROR)
     }
 
-    @ExceptionHandler(UnsupportedOperationException::class)
+    @ExceptionHandler(ResourceNotFoundException::class)
     fun handleBadRequestExceptions(ex: Exception, request: WebRequest) :
             ResponseEntity<ExceptionResponse> {
-        val exceptioResponse = ExceptionResponse(
+        val exceptionResponse = ExceptionResponse(
             Date(),
             ex.message,
             request.getDescription(false)
         )
-        return ResponseEntity<ExceptionResponse>(exceptioResponse, HttpStatus.BAD_REQUEST)
+        return ResponseEntity<ExceptionResponse>(exceptionResponse, HttpStatus.NOT_FOUND)
     }
 }
